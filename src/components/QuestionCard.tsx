@@ -7,19 +7,25 @@ type QuizQuestion = {
   incorrect_answers: string[];
 };
 
+type User = {
+  name: string;
+  email: string;
+  photoURL: string;
+};
+
 type Props = {
   questions: QuizQuestion[];
   totalQuestions: number;
   onQuizEnd: (score: number) => void;
+  user: User; // New user prop
 };
 
-const QuestionCard: React.FC<Props> = ({ questions, totalQuestions, onQuizEnd }) => {
+const QuestionCard: React.FC<Props> = ({ questions, totalQuestions, onQuizEnd, user }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState<string | null>(null);
   const [score, setScore] = useState(0);
   const [answered, setAnswered] = useState(false);
 
-  // Ensure currentQuestion is defined before accessing its properties
   const currentQuestion = questions[currentQuestionIndex];
   const answers = currentQuestion
     ? [...currentQuestion.incorrect_answers, currentQuestion.correct_answer].sort()
@@ -50,6 +56,13 @@ const QuestionCard: React.FC<Props> = ({ questions, totalQuestions, onQuizEnd })
 
   return (
     <div className="p-4 text-center text-white">
+      <div className="flex items-center space-x-4 mb-8">
+        <img src={user.photoURL} alt="User Profile" className="w-12 h-12 rounded-full" />
+        <div>
+          <h3 className="text-xl font-eczar">{user.name}</h3>
+          <p className="text-sm font-catamaran">{user.email}</p>
+        </div>
+      </div>
       <p className="text-lg font-catamaran">Question {currentQuestionIndex + 1} / {totalQuestions}</p>
       <p className="text-xl font-eczar mb-4" dangerouslySetInnerHTML={{ __html: currentQuestion.question }}></p>
       <div className="flex flex-col items-center">

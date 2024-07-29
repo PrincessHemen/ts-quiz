@@ -1,34 +1,44 @@
 // QuizResult.tsx
 import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRedoAlt, faHome } from '@fortawesome/free-solid-svg-icons';
+
+type User = {
+  name: string;
+  email: string;
+  photoURL: string;
+};
 
 type Props = {
   score: number;
   totalQuestions: number;
   onRetry: () => void;
   onHome: () => void;
+  user: User; // New user prop
 };
 
-const QuizResult: React.FC<Props> = ({ score, totalQuestions, onRetry, onHome }) => {
+const QuizResult: React.FC<Props> = ({ score, totalQuestions, onRetry, onHome, user }) => {
   return (
     <div className="p-4 text-center text-white">
-      <h2 className="text-4xl font-eczar mb-4">Quiz Complete!</h2>
-      <p className="text-lg font-catamaran">Your Score: {score} / {totalQuestions}</p>
-      <div className="flex justify-center mt-6">
-        <button
-          className="mx-2 px-6 py-3 text-lg font-catamaran bg-blue-900 hover:bg-blue-800 text-white rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out"
-          onClick={onRetry}
-        >
-          <FontAwesomeIcon icon={faRedoAlt} className="mr-2" /> Restart Quiz
-        </button>
-        <button
-          className="mx-2 px-6 py-3 text-lg font-catamaran bg-blue-900 hover:bg-blue-800 text-white rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out"
-          onClick={onHome}
-        >
-          <FontAwesomeIcon icon={faHome} className="mr-2" /> Home
-        </button>
+      <div className="flex items-center space-x-4 mb-8">
+        <img src={user.photoURL} alt="User Profile" className="w-12 h-12 rounded-full" />
+        <div>
+          <h3 className="text-xl font-eczar">{user.name}</h3>
+          <p className="text-sm font-catamaran">{user.email}</p>
+        </div>
       </div>
+      <h2 className="text-4xl font-eczar mb-4">Quiz Completed!</h2>
+      <p className="text-lg font-catamaran mb-4">You scored {score} out of {totalQuestions}</p>
+      <button
+        onClick={onRetry}
+        className="px-8 py-4 text-lg font-catamaran bg-blue-900 hover:bg-blue-800 text-white rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out mb-4"
+      >
+        Retry Quiz
+      </button>
+      <button
+        onClick={onHome}
+        className="px-8 py-4 text-lg font-catamaran bg-blue-900 hover:bg-blue-800 text-white rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out"
+      >
+        Go Home
+      </button>
     </div>
   );
 };
