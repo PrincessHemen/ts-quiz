@@ -1,89 +1,102 @@
-// QuestionCard.tsx
 import React, { useState } from 'react';
+import { QuizQuestion } from '../API';
 
-type QuizQuestion = {
-  question: string;
-  correct_answer: string;
-  incorrect_answers: string[];
-};
-
-type User = {
-  name: string;
-  email: string;
-  photoURL: string;
-};
-
-type Props = {
+interface QuestionCardProps {
   questions: QuizQuestion[];
   totalQuestions: number;
   onQuizEnd: (score: number) => void;
-  user: User; // New user prop
-};
+}
 
-const QuestionCard: React.FC<Props> = ({ questions, totalQuestions, onQuizEnd, user }) => {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [userAnswer, setUserAnswer] = useState<string | null>(null);
+const QuestionCard: React.FC<QuestionCardProps> = ({ questions, totalQuestions, onQuizEnd }) => {
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [userAnswers, setUserAnswers] = useState<string[]>([]);
   const [score, setScore] = useState(0);
-  const [answered, setAnswered] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
-  const currentQuestion = questions[currentQuestionIndex];
-  const answers = currentQuestion
-    ? [...currentQuestion.incorrect_answers, currentQuestion.correct_answer].sort()
-    : [];
+  // Ensure questions is defined and has items
+  if (!questions || questions.length === 0) {
+    return <div>Loading questions...</div>;
+  }
 
-  const checkAnswer = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const selectedAnswer = e.currentTarget.value;
-    setUserAnswer(selectedAnswer);
-    setAnswered(true);
+  const current = questions[currentQuestion];
 
-    if (selectedAnswer === currentQuestion?.correct_answer) {
-      setScore(prevScore => prevScore + 1);
-    }
+  // Ensure current is defined and has answers
+  if (!current || !current.answers) {
+    return <div>Loading question...</div>;
+  }
+
+  const handleAnswer = (answer: string) => {
+    if (!current) return;
+
+    const correctAnswer = current.correct_answer;
+    const isCorrect = correctAnswer === answer;
+
+    if (isCorrect) setScore(score + 1);
+
+    setUserAnswers((prevAnswers) => [...prevAnswers, answer]);
+    setSelectedAnswer(answer);
   };
 
-  const nextQuestion = () => {
-    setUserAnswer(null);
-    setAnswered(false);
-
-    if (currentQuestionIndex + 1 < totalQuestions) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+  const handleNextQuestion = () => {
+    if (currentQuestion + 1 < totalQuestions) {
+      setCurrentQuestion(currentQuestion + 1);
+      setSelectedAnswer(null);
     } else {
       onQuizEnd(score);
     }
   };
 
-  if (!currentQuestion) return <div>Loading...</div>;
-
   return (
-    <div className="p-4 text-center text-white">
-      <div className="flex items-center space-x-4 mb-8">
-        <img src={user.photoURL} alt="User Profile" className="w-12 h-12 rounded-full" />
-        <div>
-          <h3 className="text-xl font-eczar">{user.name}</h3>
-          <p className="text-sm font-catamaran">{user.email}</p>
-        </div>
-      </div>
-      <p className="text-lg font-catamaran">Question {currentQuestionIndex + 1} / {totalQuestions}</p>
-      <p className="text-xl font-eczar mb-4" dangerouslySetInnerHTML={{ __html: currentQuestion.question }}></p>
-      <div className="flex flex-col items-center">
-        {answers.map((answer, index) => (
-          <button
-            key={index}
-            className={`p-2 rounded mb-2 w-3/4 ${userAnswer === answer ? 'bg-green-700' : 'bg-blue-700 hover:bg-blue-600'} text-white`}
-            onClick={checkAnswer}
-            value={answer}
-            disabled={answered}
-          >
-            {answer}
-          </button>
-        ))}
-      </div>
-      {answered && (
+    <div className="max-w-3xl mx-auto p-4 bg-white rounded-lg shadow-md text-black mb-10">
+      <h2 className="text-xl font-bold">
+        Question {currentQuestion + 1} / {totalQuestions}
+      </h2>
+      <div className="my-4">
+        <h3 className="text-lg font-semibold">
+          {current.question}
+        </h3>
         <div className="mt-4">
-          <button className="bg-blue-900 hover:bg-blue-800 text-white p-2 rounded" onClick={nextQuestion}>
-            {currentQuestionIndex + 1 === totalQuestions ? 'Finish Quiz' : 'Next Question'}
-          </button>
+          {current.answers.map((answer, index) => {
+            const isSelected = selectedAnswer === answer;
+            const isCorrectAnswer = answer === current.correct_answer;
+            const isAnswered = selectedAnswer !== null;
+
+            let buttonClass = 'block w-full text-left p-2 rounded-md mb-2 transition-colors duration-200';
+
+            if (isAnswered) {
+              if (isSelected && isCorrectAnswer) {
+                buttonClass += ' bg-green-500 hover:bg-green-400'; // Correct and selected
+              } else if (isSelected && !isCorrectAnswer) {
+                buttonClass += ' bg-red-500 hover:bg-red-400'; // Incorrect and selected
+              } else if (!isSelected && isCorrectAnswer) {
+                buttonClass += ' bg-green-300 hover:bg-green-200'; // Correct but not selected
+              } else {
+                buttonClass += ' bg-gray-300 hover:bg-gray-400'; // Incorrect and not selected
+              }
+            } else {
+              buttonClass += ' bg-gray-200 hover:bg-gray-300';
+            }
+
+            return (
+              <button
+                key={index}
+                className={buttonClass}
+                onClick={() => handleAnswer(answer)}
+                disabled={isAnswered}
+              >
+                {answer}
+              </button>
+            );
+          })}
         </div>
+      </div>
+      {selectedAnswer !== null && (
+        <button
+          onClick={handleNextQuestion}
+          className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-400 text-white rounded-lg shadow-md"
+        >
+          {currentQuestion + 1 < totalQuestions ? 'Next Question' : 'End Quiz'}
+        </button>
       )}
     </div>
   );
