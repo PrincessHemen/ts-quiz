@@ -13,7 +13,6 @@ function App() {
   const [quizStarted, setQuizStarted] = useState(false);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [difficulty, setDifficulty] = useState('easy');
-  const [quizType, setQuizType] = useState('general');
   const [numQuestions, setNumQuestions] = useState(10);
   const [score, setScore] = useState(0);
   const [averageScore, setAverageScore] = useState<number>(0);
@@ -39,7 +38,7 @@ function App() {
 
   useEffect(() => {
     if (quizStarted) {
-      fetchQuizQuestions(difficulty, quizType, numQuestions)
+      fetchQuizQuestions(difficulty, numQuestions)
         .then((questions) => {
           if (questions.length === 0) {
             setError("No questions available for the selected settings. Please try a different configuration.");
@@ -53,7 +52,7 @@ function App() {
           setError(error.message);
         });
     }
-  }, [quizStarted, difficulty, quizType, numQuestions]);
+  }, [quizStarted, difficulty, numQuestions]);
 
   const logScore = async (score: number) => {
     if (!user) return;
@@ -96,10 +95,6 @@ function App() {
 
   const handleDifficultyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setDifficulty(e.target.value);
-  };
-
-  const handleQuizTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setQuizType(e.target.value);
   };
 
   const handleNumQuestionsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -155,6 +150,7 @@ function App() {
             <button onClick={startTrivia} className="mt-4 bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 rounded">
               Start Quiz
             </button>
+
             <div className="mt-4">
               <label className="block text-lg font-eczar">
                 Choose Difficulty:
@@ -167,24 +163,6 @@ function App() {
                 <option value="easy">Easy</option>
                 <option value="medium">Medium</option>
                 <option value="hard">Hard</option>
-              </select>
-            </div>
-
-            <div className="mt-4">
-              <label className="block text-lg font-eczar">
-                Choose Quiz Type:
-              </label>
-              <select
-                value={quizType}
-                onChange={handleQuizTypeChange}
-                className="mt-2 p-2 bg-white text-black rounded-md"
-              >
-                <option value="general">General Knowledge</option>
-                <option value="science">Science</option>
-                <option value="history">History</option>
-                <option value="sports">Sports</option>
-                <option value="entertainment">Entertainment</option>
-                {/* Add more options as needed */}
               </select>
             </div>
 
@@ -204,7 +182,7 @@ function App() {
           </div>
         )}
 
-        <div className="mt-10"> {/* Added padding here */}
+        <div className="mt-10">
           {quizStarted && questions.length > 0 && (
             <QuestionCard
               questions={questions}
@@ -216,14 +194,13 @@ function App() {
             
         {quizEnded && (
           <QuizResult
-          score={score}
-          totalQuestions={numQuestions}
-          averageScore={averageScore} // This should be a number
-          onRetry={startTrivia}
-          onHome={goHome}
-        />
+            score={score}
+            totalQuestions={numQuestions}
+            averageScore={averageScore}
+            onRetry={startTrivia}
+            onHome={goHome}
+          />
         )}
-
       </div>
     </div>
   );
