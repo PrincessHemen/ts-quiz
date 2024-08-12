@@ -9,7 +9,6 @@ interface QuestionCardProps {
 
 const QuestionCard: React.FC<QuestionCardProps> = ({ questions, totalQuestions, onQuizEnd }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<string[]>([]);
   const [score, setScore] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
@@ -33,7 +32,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ questions, totalQuestions, 
 
     if (isCorrect) setScore(score + 1);
 
-    setUserAnswers((prevAnswers) => [...prevAnswers, answer]);
     setSelectedAnswer(answer);
   };
 
